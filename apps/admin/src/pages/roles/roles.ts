@@ -10,10 +10,9 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { HttpClient } from '@angular/common/http';
-import { lastValueFrom } from 'rxjs';
 import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef, GridReadyEvent, GridApi } from 'ag-grid-community';
+import { UserStore } from '../../stores/user.store';
 
 interface OperationClaim {
   id: number;
@@ -35,14 +34,10 @@ interface OperationClaim {
   ],
 })
 export default class Roles {
-  private http = inject(HttpClient);
+  private userStore = inject(UserStore);
 
-  rolesResource = resource({
-    loader: () => lastValueFrom(this.http.get<OperationClaim[]>('api/operationclaims'))
-  });
-
-  roles = computed(() => this.rolesResource.value() || []);
-  loading = computed(() => this.rolesResource.isLoading());
+  readonly roles = computed(() => this.userStore.rolesResource.value() || []);
+  readonly loading = computed(() => this.userStore.rolesResource.isLoading());
 
   columnDefs: ColDef[] = [
     {
@@ -62,7 +57,7 @@ export default class Roles {
       field: 'description',
       flex: 2,
       valueGetter: (params) => this.getRoleDescription(params.data.name),
-    }
+    },
   ];
 
   defaultColDef: ColDef = {
@@ -76,7 +71,7 @@ export default class Roles {
 
   getRoleDescription(roleName: string): string {
     const descriptions: Record<string, string> = {
-      'Admin': 'Tam yönetici yetkisi',
+      Admin: 'Tam yönetici yetkisi',
       'Users.Read': 'Kullanıcıları görüntüleme',
       'Users.Write': 'Kullanıcı ekleme/düzenleme',
       'Orders.Read': 'Siparişleri görüntüleme',
@@ -86,6 +81,6 @@ export default class Roles {
   }
 
   refresh() {
-    this.rolesResource.reload();
+    this.userStore.rolesResource.reload();
   }
 }

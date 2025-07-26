@@ -4,61 +4,174 @@
     {{ data.user.firstName }} {{ data.user.lastName }} - Rol Atama
   </h2>
   
-  <div mat-dialog-content>
+  <div mat-dialog-content class="dialog-content">
     <div class="user-summary">
       <strong>{{ data.user.firstName }} {{ data.user.lastName }}</strong> kullanıcısına rol atayın/çıkarın
     </div>
 
-    <div class="roles-section">
-      <h4>Mevcut Roller</h4>
-      @if (loading()) {
-        <div class="loading">
-          <mat-spinner diameter="30"></mat-spinner>
-          <span>Yükleniyor...</span>
+    <div class="main-content">
+      <!-- Sol Panel - Mevcut Roller -->
+      <div class="current-roles-panel">
+        <div class="panel-header">
+          <h3>
+            <mat-icon>verified_user</mat-icon>
+            Mevcut Roller ({{ data.user.operationClaims.length }})
+          </h3>
         </div>
-      } @else {
-        <div class="roles-list">
-          @for (role of data.availableRoles; track role.id) {
-            <div class="role-item">
-              <mat-checkbox 
-                [checked]="isRoleAssigned(role.id)"
-                (change)="toggleRole(role.id, $event.checked)">
-                <div class="role-info">
+        <div class="current-roles-list">
+          @if (data.user.operationClaims.length > 0) {
+            @for (role of data.user.operationClaims; track role.id) {
+              <div class="current-role-item">
+                <div class="role-badge">
                   <span class="role-name">{{ role.name }}</span>
-                  <span class="role-description">{{ getRoleDescription(role.name) }}</span>
+                  <span class="role-desc">{{ getRoleDescription(role.name) }}</span>
                 </div>
-              </mat-checkbox>
+                <button mat-icon-button 
+                        color="warn" 
+                        (click)="toggleRole(role.id, false)"
+                        matTooltip="Rolü Çıkar">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            }
+          } @else {
+            <div class="no-current-roles">
+              <mat-icon>info</mat-icon>
+              <p>Henüz rol atanmamış</p>
             </div>
           }
         </div>
-      }
-    </div>
+      </div>
 
-    @if (hasChanges()) {
-      <div class="changes-summary">
-        <h4>Değişiklikler</h4>
-        @if (rolesToAdd().length > 0) {
-          <div class="changes-section">
-            <strong>Eklenecek:</strong>
-            <div class="changes-list">
-              @for (roleId of rolesToAdd(); track roleId) {
-                <span class="change-item add">{{ getRoleName(roleId) }}</span>
-              }
-            </div>
+      <!-- Orta Panel - Rol Seçimi -->
+      <div class="role-selection-panel">
+        <!-- Filtre Seçenekleri -->
+        <div class="filter-section">
+          <div class="filter-row">
+            <mat-form-field appearance="outline" class="category-select">
+              <mat-label>Kategori</mat-label>
+              <mat-select [value]="selectedCategory()" (selectionChange)="onCategoryChange($event.value)">
+                <mat-option value="all">Tüm Kategoriler</mat-option>
+                @for (category of roleCategories(); track category) {
+                  <mat-option [value]="category">{{ category }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            @if (selectedCategory() !== 'all' && availablePermissions().length > 0) {
+              <mat-form-field appearance="outline" class="permission-select">
+                <mat-label>İzin</mat-label>
+                <mat-select [value]="selectedPermission()" (selectionChange)="onPermissionChange($event.value)">
+                  <mat-option value="all">Tüm İzinler</mat-option>
+                  @for (permission of availablePermissions(); track permission) {
+                    <mat-option [value]="permission">{{ permission }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            }
           </div>
-        }
-        @if (rolesToRemove().length > 0) {
-          <div class="changes-section">
-            <strong>Çıkarılacak:</strong>
-            <div class="changes-list">
-              @for (roleId of rolesToRemove(); track roleId) {
-                <span class="change-item remove">{{ getRoleName(roleId) }}</span>
+        </div>
+
+        <div class="roles-section">
+          <h4>
+            Tüm Roller
+            @if (selectedCategory() !== 'all') {
+              <span class="filter-info">({{ selectedCategory() }}{{ selectedPermission() !== 'all' ? '.' + selectedPermission() : '' }})</span>
+            }
+          </h4>
+          
+          @if (loading()) {
+            <div class="loading">
+              <mat-spinner diameter="30"></mat-spinner>
+              <span>Yükleniyor...</span>
+            </div>
+          } @else {
+            <div class="roles-list">
+              @for (role of filteredRoles(); track role.id) {
+                <div class="role-item" [class.assigned]="isRoleAssigned(role.id)">
+                  <mat-checkbox 
+                    [checked]="isRoleAssigned(role.id)"
+                    (change)="toggleRole(role.id, $event.checked)">
+                    <div class="role-info">
+                      <span class="role-name">{{ role.name }}</span>
+                      <span class="role-description">{{ getRoleDescription(role.name) }}</span>
+                    </div>
+                  </mat-checkbox>
+                </div>
+              } @empty {
+                <div class="no-roles">
+                  <mat-icon>info</mat-icon>
+                  <p>Bu filtreye uygun rol bulunamadı</p>
+                </div>
               }
             </div>
+          }
+        </div>
+      </div>
+
+      <!-- Sağ Panel - Değişiklik Özeti -->
+      <div class="changes-panel">
+        <div class="panel-header">
+          <h3>
+            <mat-icon>sync</mat-icon>
+            Değişiklikler
+          </h3>
+        </div>
+        
+        @if (hasChanges()) {
+          <div class="changes-content">
+            @if (rolesToAdd().length > 0) {
+              <div class="changes-section add-section">
+                <h4>
+                  <mat-icon>add</mat-icon>
+                  Eklenecek ({{ rolesToAdd().length }})
+                </h4>
+                <div class="changes-list">
+                  @for (roleId of rolesToAdd(); track roleId) {
+                    <div class="change-item add">
+                      <span class="role-name">{{ getRoleName(roleId) }}</span>
+                      <button mat-icon-button 
+                              size="small" 
+                              (click)="toggleRole(roleId, false)"
+                              matTooltip="Geri Al">
+                        <mat-icon>undo</mat-icon>
+                      </button>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+            
+            @if (rolesToRemove().length > 0) {
+              <div class="changes-section remove-section">
+                <h4>
+                  <mat-icon>remove</mat-icon>
+                  Çıkarılacak ({{ rolesToRemove().length }})
+                </h4>
+                <div class="changes-list">
+                  @for (roleId of rolesToRemove(); track roleId) {
+                    <div class="change-item remove">
+                      <span class="role-name">{{ getRoleName(roleId) }}</span>
+                      <button mat-icon-button 
+                              size="small" 
+                              (click)="toggleRole(roleId, true)"
+                              matTooltip="Geri Al">
+                        <mat-icon>undo</mat-icon>
+                      </button>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="no-changes">
+            <mat-icon>check_circle</mat-icon>
+            <p>Henüz değişiklik yapılmadı</p>
           </div>
         }
       </div>
-    }
+    </div>
   </div>
 
   <div mat-dialog-actions>

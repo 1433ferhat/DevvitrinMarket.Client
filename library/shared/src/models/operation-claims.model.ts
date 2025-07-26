@@ -1,4 +1,4 @@
 export interface OperationClaimsModel {
-  id: string;
+  id: number;
   name: string;
 }

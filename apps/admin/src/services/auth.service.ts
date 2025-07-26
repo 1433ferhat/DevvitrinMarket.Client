@@ -103,13 +103,13 @@ export class AuthService {
     if (Array.isArray(roles)) {
       roles.forEach((roleName: string, index: number) => {
         operationClaims.push({
-          id: `${index + 1}`,
+          id: index + 1,
           name: roleName
         });
       });
     } else if (typeof roles === 'string') {
       operationClaims.push({
-        id: '1',
+        id: 1,
         name: roles
       });
     }
