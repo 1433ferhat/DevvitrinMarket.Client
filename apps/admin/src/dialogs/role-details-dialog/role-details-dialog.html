@@ -1,0 +1,45 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>
+    <mat-icon>security</mat-icon>
+    {{ data.user.firstName }} {{ data.user.lastName }} - Rol Detayları
+  </h2>
+  
+  <div mat-dialog-content>
+    <div class="user-info">
+      <div class="user-avatar">
+        {{ getUserInitials() }}
+      </div>
+      <div class="user-details">
+        <h3>{{ data.user.firstName }} {{ data.user.lastName }}</h3>
+        <p>{{ data.user.email }}</p>
+      </div>
+    </div>
+
+    <div class="roles-section">
+      <h4>Atanmış Roller</h4>
+      @if (data.user.operationClaims.length > 0) {
+        <div class="roles-list">
+          @for (role of data.user.operationClaims; track role.id) {
+            <mat-chip [color]="getRoleColor(role.name)">
+              <mat-icon>{{ getRoleIcon(role.name) }}</mat-icon>
+              {{ role.name }}
+            </mat-chip>
+          }
+        </div>
+      } @else {
+        <div class="no-roles">
+          <mat-icon>info</mat-icon>
+          <p>Bu kullanıcıya henüz rol atanmamış</p>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div mat-dialog-actions>
+    <button mat-button (click)="close()">Kapat</button>
+    <button mat-raised-button color="primary" (click)="assignRoles()">
+      <mat-icon>edit</mat-icon>
+      Rol Ata/Çıkar
+    </button>
+  </div>
+</div>

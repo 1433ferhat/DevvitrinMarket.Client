@@ -1,0 +1,73 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>
+    <mat-icon>security</mat-icon>
+    {{ data.user.firstName }} {{ data.user.lastName }} - Rol Atama
+  </h2>
+  
+  <div mat-dialog-content>
+    <div class="user-summary">
+      <strong>{{ data.user.firstName }} {{ data.user.lastName }}</strong> kullanıcısına rol atayın/çıkarın
+    </div>
+
+    <div class="roles-section">
+      <h4>Mevcut Roller</h4>
+      @if (loading()) {
+        <div class="loading">
+          <mat-spinner diameter="30"></mat-spinner>
+          <span>Yükleniyor...</span>
+        </div>
+      } @else {
+        <div class="roles-list">
+          @for (role of data.availableRoles; track role.id) {
+            <div class="role-item">
+              <mat-checkbox 
+                [checked]="isRoleAssigned(role.id)"
+                (change)="toggleRole(role.id, $event.checked)">
+                <div class="role-info">
+                  <span class="role-name">{{ role.name }}</span>
+                  <span class="role-description">{{ getRoleDescription(role.name) }}</span>
+                </div>
+              </mat-checkbox>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    @if (hasChanges()) {
+      <div class="changes-summary">
+        <h4>Değişiklikler</h4>
+        @if (rolesToAdd().length > 0) {
+          <div class="changes-section">
+            <strong>Eklenecek:</strong>
+            <div class="changes-list">
+              @for (roleId of rolesToAdd(); track roleId) {
+                <span class="change-item add">{{ getRoleName(roleId) }}</span>
+              }
+            </div>
+          </div>
+        }
+        @if (rolesToRemove().length > 0) {
+          <div class="changes-section">
+            <strong>Çıkarılacak:</strong>
+            <div class="changes-list">
+              @for (roleId of rolesToRemove(); track roleId) {
+                <span class="change-item remove">{{ getRoleName(roleId) }}</span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <div mat-dialog-actions>
+    <button mat-button (click)="cancel()">İptal</button>
+    <button mat-raised-button color="primary" 
+            [disabled]="!hasChanges()" 
+            (click)="save()">
+      <mat-icon>save</mat-icon>
+      Kaydet
+    </button>
+  </div>
+</div>

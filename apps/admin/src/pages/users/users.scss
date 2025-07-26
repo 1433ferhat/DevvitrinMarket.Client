@@ -1,0 +1,196 @@
+.users-page {
+  .page-header {
+    margin-bottom: 24px;
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 16px;
+
+      .title-section {
+        .page-title {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin: 0 0 8px 0;
+          font-size: 28px;
+          font-weight: 600;
+          color: #1e293b;
+
+          mat-icon {
+            font-size: 32px;
+            width: 32px;
+            height: 32px;
+            color: #667eea;
+          }
+        }
+
+        .page-subtitle {
+          margin: 0;
+          color: #64748b;
+          font-size: 16px;
+        }
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+
+        button {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          white-space: nowrap;
+        }
+      }
+    }
+  }
+
+  .users-grid-card {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+
+    .mdc-card__header,
+    mat-card-header {
+      padding: 20px 24px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+
+      .mat-mdc-card-title,
+      mat-card-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0;
+
+        mat-icon {
+          color: #667eea;
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+
+    .mdc-card__content,
+    mat-card-content {
+      padding: 24px !important;
+
+      .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        color: #64748b;
+
+        .loading-spinner {
+          font-size: 48px;
+          width: 48px;
+          height: 48px;
+          margin-bottom: 16px;
+          animation: spin 1s linear infinite;
+        }
+
+        p {
+          margin: 0;
+          font-size: 16px;
+        }
+      }
+
+      .ag-theme-alpine {
+        --ag-header-background-color: #f8fafc;
+        --ag-header-foreground-color: #374151;
+        --ag-border-color: #e2e8f0;
+        --ag-row-hover-color: #f8fafc;
+        --ag-selected-row-background-color: #e0f2fe;
+        --ag-font-family: 'Roboto', sans-serif;
+        --ag-font-size: 14px;
+
+        .ag-header {
+          font-weight: 600;
+          border-bottom: 2px solid #667eea;
+        }
+
+        .ag-cell {
+          display: flex;
+          align-items: center;
+          padding: 12px 16px;
+        }
+
+        .ag-row {
+          transition: background-color 0.2s ease;
+          
+          &:hover {
+            background-color: var(--ag-row-hover-color) !important;
+          }
+        }
+
+        // Floating filter styling
+        .ag-floating-filter-input {
+          border: 1px solid #d1d5db;
+          border-radius: 6px;
+          padding: 6px 8px;
+          font-size: 13px;
+          
+          &:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+          }
+        }
+
+        // Custom button styling in cells
+        button {
+          font-size: 12px;
+          padding: 6px 12px;
+          border-radius: 6px;
+          border: none;
+          cursor: pointer;
+          font-weight: 500;
+          transition: all 0.2s ease;
+
+          &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          }
+        }
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .users-page {
+    .page-header .header-content {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .users-grid-card {
+      .mdc-card__content,
+      mat-card-content {
+        padding: 16px !important;
+
+        .ag-theme-alpine {
+          --ag-font-size: 13px;
+        }
+      }
+    }
+  }
+}

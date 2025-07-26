@@ -1,0 +1,50 @@
+<div class="users-page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon>people</mat-icon>
+          Kullanıcı Yönetimi
+        </h1>
+        <p class="page-subtitle">Sistem kullanıcılarını yönetin</p>
+      </div>
+      <div class="header-actions">
+        <button mat-raised-button color="primary" (click)="openCreateDialog()">
+          <mat-icon>person_add</mat-icon>
+          Yeni Kullanıcı
+        </button>
+        <button mat-icon-button (click)="refresh()">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Users Grid -->
+  <mat-card class="users-grid-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>list</mat-icon>
+        Kullanıcı Listesi ({{ users().length }})
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      @if (loading()) {
+        <div class="loading-container">
+          <mat-icon class="loading-spinner">hourglass_empty</mat-icon>
+          <p>Kullanıcılar yükleniyor...</p>
+        </div>
+      } @else {
+        <ag-grid-angular
+          class="ag-theme-alpine"
+          [rowData]="users()"
+          [columnDefs]="columnDefs"
+          [defaultColDef]="defaultColDef"
+          (gridReady)="onGridReady($event)"
+          style="height: 600px; width: 100%;">
+        </ag-grid-angular>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>
