@@ -1,0 +1,49 @@
+/* src/app/layout/layout.scss */
+.app-layout {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-container {
+  flex: 1;
+  
+  .app-sidenav {
+    width: 260px;
+    border-right: 1px solid #e0e0e0;
+  }
+
+  .app-content {
+    .content-wrapper {
+      display: flex;
+      height: 100%;
+
+      .left-content {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+      }
+
+      .right-panel {
+        width: 400px;
+        border-left: 1px solid #e0e0e0;
+        background-color: #fafafa;
+        overflow-y: auto;
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .app-content .content-wrapper {
+    flex-direction: column;
+
+    .right-panel {
+      width: 100%;
+      height: 300px;
+      border-left: none;
+      border-top: 1px solid #e0e0e0;
+    }
+  }
+}

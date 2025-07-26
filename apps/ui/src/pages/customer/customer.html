@@ -1,0 +1,31 @@
+<div class="customers-page">
+
+  <!-- Müşteri Listesi -->
+  <mat-card class="table-card">
+    <flexi-grid [data]="customers()" [loading]="loading()" [showCaption]="true" captionTitle="Muşteri Listesi"
+      [showExportExcelBtn]="true" language="tr" (onRefresh)="refresh()">
+      <ng-template flexiGridCaptionCommandTemplate>
+        <button mat-raised-button color="primary" routerLink="/musteriler/ekle">
+          <mat-icon>person_add</mat-icon>
+          Yeni Müşteri
+        </button>
+      </ng-template>
+      <flexi-grid-column width="100px" field="firstName" title="Ad" />
+      <flexi-grid-column width="100px" field="lastName" title="Soyad" />
+      <flexi-grid-column width="100px" field="phone" title="Telefon" />
+      <flexi-grid-column field="email" title="Mail" />
+      <flexi-grid-column field="companyName" title="Şirket" />
+      <flexi-grid-column field="taxNumber" title="Vergi No" />
+      <flexi-grid-column width="100px" field="tcNo" title="Tc No" />
+      <flexi-grid-column width="50px" field="type" title="Cari Tipi" />
+
+      <ng-template flexiGridColumnCommandTemplate let-item>
+        <flexi-button [routerLink]="['/','musteriler','ekle', item.id]" btnIcon="edit" btnColor="info" btnSize="small"
+          title="Güncelle" flexiTooltip />
+        <flexi-button (click)="deleteCustomer(item)" btnIcon="delete" btnColor="danger" btnSize="small" title="Sil"
+          flexiTooltip />
+      </ng-template>
+
+    </flexi-grid>
+  </mat-card>
+</div>

@@ -1,0 +1,28 @@
+<!-- src/app/layout/layout.html -->
+<div class="app-layout">
+  <!-- Header -->
+  <app-header (sidebarToggle)="onSidebarToggle()"></app-header>
+
+  <!-- Main Container -->
+  <mat-sidenav-container class="app-container">
+    <!-- Sidebar -->
+    <mat-sidenav #sidenav mode="side" [opened]="sidebarOpen()" class="app-sidenav">
+      <app-sidebar></app-sidebar>
+    </mat-sidenav>
+
+    <!-- Main Content -->
+    <mat-sidenav-content class="app-content">
+      <div class="content-wrapper">
+        <!-- Sol İçerik - Router Outlet -->
+        <div class="left-content">
+          <router-outlet />
+        </div>
+
+        <!-- Sağ Panel - Sipariş Detayları -->
+        <div class="right-panel">
+          <app-order-panel />
+        </div>
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

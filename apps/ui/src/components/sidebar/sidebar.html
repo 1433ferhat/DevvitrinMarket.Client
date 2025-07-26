@@ -1,0 +1,37 @@
+<div class="sidebar-content">
+  <nav class="navigation-menu">
+    @for (menu of menus; track menu.name) {
+    @if (menu?.children) {
+    <div class="menu-category">
+      <button mat-button class="category-button" [class.expanded]="isExpanded(menu.name)"
+        (click)="toggleMenu(menu.name)">
+        <mat-icon>{{ menu.icon }}</mat-icon>
+        <span>{{ menu.name }}</span>
+        <mat-icon class="expand-icon">
+          {{ isExpanded(menu.name) ? 'expand_less' : 'expand_more' }}
+        </mat-icon>
+      </button>
+
+      <div class="category-items" [class.expanded]="isExpanded(menu.name)">
+        @for (child of menu.children; track child.route) {
+        <a mat-button class="child-button" [routerLink]="child.route" routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }">
+          <mat-icon>{{ child.icon }}</mat-icon>
+          <span>{{ child.name }}</span>
+        </a>
+        }
+      </div>
+    </div>
+    }
+    @else {
+    <div class="menu-item">
+      <a mat-button class="menu-button" [routerLink]="menu.route" routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }">
+        <mat-icon>{{ menu.icon }}</mat-icon>
+        <span>{{ menu.name }}</span>
+      </a>
+    </div>
+    }
+    }
+  </nav>
+</div>

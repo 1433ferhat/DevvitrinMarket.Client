@@ -1,0 +1,43 @@
+<!-- src/app/pages/orders/orders.html -->
+<div class="orders-container">
+  <!-- Header Card -->
+  <mat-card class="header-card">
+    <mat-card-content>
+      <div class="header-content">
+        <div class="title-section">
+          <h1 class="title">
+            <mat-icon>receipt_long</mat-icon>
+            Siparişler
+          </h1>
+          <div class="header-actions">
+            <button mat-raised-button color="primary" (click)="refreshGrid()">
+              <mat-icon>refresh</mat-icon>
+              Yenile
+            </button>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Data Grid Card -->
+  <mat-card class="grid-card">
+    <mat-card-content>
+      @if (loading()) {
+        <div class="loading-container">
+          <mat-icon class="loading-icon">hourglass_empty</mat-icon>
+          <p>Siparişler yükleniyor...</p>
+        </div>
+      } @else {
+        <ag-grid-angular
+          class="ag-theme-alpine orders-grid"
+          [rowData]="orders()"
+          [columnDefs]="columnDefs"
+          [defaultColDef]="defaultColDef"
+          [gridOptions]="gridOptions"
+          (gridReady)="onGridReady($event)"
+        ></ag-grid-angular>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>
