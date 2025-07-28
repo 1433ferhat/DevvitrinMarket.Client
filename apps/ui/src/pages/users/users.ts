@@ -12,7 +12,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialogModule } from '@angular/material/dialog';
 import { UserModel } from '@shared/models/user.model';
-import { OperationClaimsModel } from '@shared/models/operation-claims.model';
+import { OperationClaimModel } from '@shared/models/operation-claims.model';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
@@ -34,19 +34,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   ],
 })
 export default class Users {
-  users = signal<UserModel[]>([
-    {
-      id: '1',
-      name: 'Admin User',
-      firstName: 'Admin', // Eksik olan alan eklendi
-      lastName: 'User',   // Eksik olan alan eklendi
-      email: 'admin@example.com',
-      operationClaims: [
-        { id: '1', name: 'admin' } as OperationClaimsModel
-      ],
-      status: 'active',
-    },
-  ]);
+  users = signal<UserModel[]>([]);
 
   displayedColumns: string[] = [
     'name',
@@ -85,7 +73,7 @@ export default class Users {
     this.users.set(updatedUsers);
   }
 
-  getRoleText(claim: OperationClaimsModel): string {
+  getRoleText(claim: OperationClaimModel): string {
     const roles: any = {
       admin: 'Yönetici',
       cashier: 'Kasiyer',

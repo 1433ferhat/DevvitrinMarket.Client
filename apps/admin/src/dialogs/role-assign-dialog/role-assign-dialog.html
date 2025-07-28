@@ -3,7 +3,7 @@
     <mat-icon>security</mat-icon>
     {{ data.user.firstName }} {{ data.user.lastName }} - Rol Atama
   </h2>
-  
+
   <div mat-dialog-content class="dialog-content">
     <div class="user-summary">
       <strong>{{ data.user.firstName }} {{ data.user.lastName }}</strong> kullanıcısına rol atayın/çıkarın
@@ -15,20 +15,20 @@
         <div class="panel-header">
           <h3>
             <mat-icon>verified_user</mat-icon>
-            Mevcut Roller ({{ data.user.operationClaims.length }})
+            Mevcut Roller ({{ (data.user.userOperationClaims || []).length }})
           </h3>
         </div>
         <div class="current-roles-list">
-          @if (data.user.operationClaims.length > 0) {
-            @for (role of data.user.operationClaims; track role.id) {
+          @if ((data.user.userOperationClaims || []).length > 0) {
+            @for (userOpClaim of (data.user.userOperationClaims || []); track userOpClaim.id) {
               <div class="current-role-item">
                 <div class="role-badge">
-                  <span class="role-name">{{ role.name }}</span>
-                  <span class="role-desc">{{ getRoleDescription(role.name) }}</span>
+                  <span class="role-name">{{ getRoleName(userOpClaim.operationClaimId) }}</span>
+                  <span class="role-desc">{{ getRoleDescription(getRoleName(userOpClaim.operationClaimId)) }}</span>
                 </div>
                 <button mat-icon-button 
                         color="warn" 
-                        (click)="toggleRole(role.id, false)"
+                        (click)="removeRole(userOpClaim.operationClaimId)"
                         matTooltip="Rolü Çıkar">
                   <mat-icon>close</mat-icon>
                 </button>
@@ -79,7 +79,7 @@
               <span class="filter-info">({{ selectedCategory() }}{{ selectedPermission() !== 'all' ? '.' + selectedPermission() : '' }})</span>
             }
           </h4>
-          
+
           @if (loading()) {
             <div class="loading">
               <mat-spinner diameter="30"></mat-spinner>
@@ -117,7 +117,7 @@
             Değişiklikler
           </h3>
         </div>
-        
+
         @if (hasChanges()) {
           <div class="changes-content">
             @if (rolesToAdd().length > 0) {
@@ -141,7 +141,7 @@
                 </div>
               </div>
             }
-            
+
             @if (rolesToRemove().length > 0) {
               <div class="changes-section remove-section">
                 <h4>
@@ -176,9 +176,7 @@
 
   <div mat-dialog-actions>
     <button mat-button (click)="cancel()">İptal</button>
-    <button mat-raised-button color="primary" 
-            [disabled]="!hasChanges()" 
-            (click)="save()">
+    <button mat-raised-button color="primary" [disabled]="!hasChanges()" (click)="save()">
       <mat-icon>save</mat-icon>
       Kaydet
     </button>

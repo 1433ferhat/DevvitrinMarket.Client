@@ -21,17 +21,11 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { UserStore } from '../../stores/user.store';
+import { UserModel } from '@shared/models/user.model';
+import { Common } from '../../services/common';
 
 interface DialogData {
-  user: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    operationClaims: Array<{
-      id: number;
-      name: string;
-    }>;
-  };
+  user: UserModel;
 }
 
 @Component({
@@ -55,16 +49,19 @@ interface DialogData {
 export default class RoleAssignDialog {
   private dialogRef = inject(MatDialogRef<RoleAssignDialog>);
   private userStore = inject(UserStore);
+  private common = inject(Common);
 
-  selectedRoles = signal<Set<number>>(new Set());
-  selectedCategory = signal<string>('all');
-  selectedPermission = signal<string>('all');
+  readonly selectedRoles = signal<Set<number>>(new Set());
+  readonly selectedCategory = signal<string>('all');
+  readonly selectedPermission = signal<string>('all');
 
-  availableRoles = computed(() => this.userStore.rolesResource.value() || []);
-  loading = computed(() => this.userStore.rolesResource.isLoading());
+  readonly availableRoles = computed(
+    () => this.common.rolesResource.value() || []
+  );
+  readonly loading = computed(() => this.common.rolesResource.isLoading());
 
   // Role kategorilerini ayır
-  roleCategories = computed(() => {
+  readonly roleCategories = computed(() => {
     const roles = this.availableRoles();
     const categories = new Set<string>();
 
@@ -81,7 +78,7 @@ export default class RoleAssignDialog {
   });
 
   // Seçili kategoriye göre permissions
-  availablePermissions = computed(() => {
+  readonly availablePermissions = computed(() => {
     const category = this.selectedCategory();
     if (category === 'all') return [];
 
@@ -103,7 +100,7 @@ export default class RoleAssignDialog {
   });
 
   // Filtrelenmiş roller
-  filteredRoles = computed(() => {
+  readonly filteredRoles = computed(() => {
     const roles = this.availableRoles();
     const category = this.selectedCategory();
     const permission = this.selectedPermission();
@@ -133,28 +130,30 @@ export default class RoleAssignDialog {
     return filtered;
   });
 
-  rolesToAdd = computed(() => {
+  readonly rolesToAdd = computed(() => {
     const currentRoleIds = new Set(
-      this.data.user.operationClaims.map((r) => r.id)
+      (this.data.user.userOperationClaims || []).map((r) => r.operationClaimId)
     );
     const selected = this.selectedRoles();
     return Array.from(selected).filter((roleId) => !currentRoleIds.has(roleId));
   });
 
-  rolesToRemove = computed(() => {
+  readonly rolesToRemove = computed(() => {
     const currentRoleIds = new Set(
-      this.data.user.operationClaims.map((r) => r.id)
+      (this.data.user.userOperationClaims || []).map((r) => r.operationClaimId)
     );
     const selected = this.selectedRoles();
     return Array.from(currentRoleIds).filter((roleId) => !selected.has(roleId));
   });
 
-  hasChanges = computed(() => {
+  readonly hasChanges = computed(() => {
     return this.rolesToAdd().length > 0 || this.rolesToRemove().length > 0;
   });
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: DialogData) {
-    const currentRoleIds = this.data.user.operationClaims.map((r) => r.id);
+    const currentRoleIds = (this.data.user.userOperationClaims || []).map(
+      (r) => r.operationClaimId
+    );
     this.selectedRoles.set(new Set(currentRoleIds));
   }
 
@@ -170,6 +169,10 @@ export default class RoleAssignDialog {
       current.delete(roleId);
     }
     this.selectedRoles.set(current);
+  }
+
+  removeRole(roleId: number) {
+    this.toggleRole(roleId, false);
   }
 
   onCategoryChange(category: string) {
@@ -209,7 +212,7 @@ export default class RoleAssignDialog {
       this.dialogRef.close({
         rolesToAdd: this.rolesToAdd(),
         rolesToRemove: this.rolesToRemove(),
-        userId: this.data.user.id,
+        userId: this.data.user.id, // ✅ userId düzgün gönder
       });
     }
   }

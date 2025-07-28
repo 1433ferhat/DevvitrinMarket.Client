@@ -7,15 +7,15 @@ export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const common = inject(Common);
   const router = inject(Router);
-  
+
   // Token ve authentication kontrolü
   if (!authService.isAuthenticated()) {
-    router.navigateByUrl("/login");
+    router.navigateByUrl('/login');
     return false;
   }
-  
+
   // User bilgisi signal'da yoksa token'dan yükle
-  if (!common.getCurrentUser()) {
+  if (!common.user()) {
     const userInfo = authService.parseUserFromToken();
     if (userInfo) {
       common.setUser(userInfo);
@@ -25,18 +25,6 @@ export const authGuard: CanActivateFn = (route, state) => {
       return false;
     }
   }
-
-  // Route seviyesinde rol kontrolü (opsiyonel)
-  const requiredRoles = route.data?.['roles'] as string[];
-  if (requiredRoles && requiredRoles.length > 0) {
-    const hasRequiredRole = common.hasAnyRole(requiredRoles);
-    if (!hasRequiredRole) {
-      // Yetki yoksa dashboard'a yönlendir
-      router.navigateByUrl("/dashboard");
-      return false;
-    }
-  }
-
   return true;
 };
 
@@ -44,59 +32,16 @@ export const authGuard: CanActivateFn = (route, state) => {
 export const adminGuard: CanActivateFn = (route, state) => {
   const common = inject(Common);
   const router = inject(Router);
-  
+
   // Önce authentication kontrolü
   const authResult = authGuard(route, state);
   if (!authResult) return false;
 
   // Admin kontrolü
   if (!common.isAdmin()) {
-    router.navigateByUrl("/dashboard");
+    router.navigateByUrl('/dashboard');
     return false;
   }
 
   return true;
-};
-
-// Belirli roller için guard factory
-export const roleGuard = (allowedRoles: string[]): CanActivateFn => {
-  return (route, state) => {
-    const common = inject(Common);
-    const router = inject(Router);
-    
-    // Önce authentication kontrolü
-    const authResult = authGuard(route, state);
-    if (!authResult) return false;
-
-    // Rol kontrolü
-    const hasRole = common.hasAnyRole(allowedRoles);
-    if (!hasRole) {
-      router.navigateByUrl("/dashboard");
-      return false;
-    }
-
-    return true;
-  };
-};
-
-// Yetki kontrolü guard (belirli sayfalar için)
-export const permissionGuard = (requiredPermissions: string[]): CanActivateFn => {
-  return (route, state) => {
-    const common = inject(Common);
-    const router = inject(Router);
-    
-    // Önce authentication kontrolü
-    const authResult = authGuard(route, state);
-    if (!authResult) return false;
-
-    // Permission kontrolü (role ile aynı mantık)
-    const hasPermission = common.hasAnyRole(requiredPermissions);
-    if (!hasPermission) {
-      // Yetki yoksa 403 sayfasına veya dashboard'a yönlendir
-      router.navigateByUrl("/dashboard");
-      return false;
-    }
-
-    return true;
-  };
 };

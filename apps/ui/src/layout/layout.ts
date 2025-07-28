@@ -20,6 +20,7 @@ import { CategoryStore } from '@shared/stores/category.store';
 import { CustomerStore } from '@shared/stores/customer.store';
 import { CustomerModel } from '@shared/models/customer.model';
 import { Common } from '../services/common';
+import { OperationClaimStore } from '@shared/stores/operation-claim.store';
 
 @Component({
   selector: 'app-layout',
@@ -47,9 +48,9 @@ export default class Layout {
   private orderStore = inject(OrderStore);
   private customerStore = inject(CustomerStore);
   private categoryStore = inject(CategoryStore);
-  private common = inject(Common);
+  private operationClaimStore = inject(OperationClaimStore);
 
-  isUserLoggedIn = computed(() => this.common.isLoggedIn());
+  isUserLoggedIn = computed(() => this.operationClaimStore.isLoggedIn());
 
   sidebarOpen = signal(true);
   selectedCustomer = signal<CustomerModel | null>(null);

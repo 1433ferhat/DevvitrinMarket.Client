@@ -2,10 +2,8 @@ import {
   Component,
   ChangeDetectionStrategy,
   ViewEncapsulation,
-  signal,
   computed,
   inject,
-  resource,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -22,6 +20,7 @@ import RoleDetailsDialog from '../../dialogs/role-details-dialog/role-details-di
 import RoleAssignDialog from '../../dialogs/role-assign-dialog/role-assign-dialog';
 import { UserStore } from '../../stores/user.store';
 import { UserModel } from '@shared/models/user.model';
+import { Common } from '../../services/common';
 
 @Component({
   selector: 'app-users',
@@ -44,15 +43,12 @@ export default class Users {
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
   private userStore = inject(UserStore);
-
-  readonly users = computed<UserModel[]>(() => this.userStore.users());
-  readonly loading = computed<boolean>(
-    () =>
-      this.userStore.rolesResource.isLoading() ||
-      this.userStore.usersResource.isLoading()
-  );
+  private common = inject(Common);
 
   private gridApi!: GridApi;
+
+  readonly users = computed(() => this.userStore.users());
+  readonly loading = computed(() => this.userStore.usersResource.isLoading());
 
   columnDefs: ColDef[] = [
     {
@@ -76,11 +72,21 @@ export default class Users {
       field: 'roles',
       flex: 2,
       cellRenderer: (params: any) => {
-        const roles = params.data.operationClaims || [];
-        if (roles.length === 0)
+        const userOperationClaims = params.data.userOperationClaims || [];
+        if (userOperationClaims.length === 0)
           return '<span style="color: #999;">Rol yok</span>';
 
-        const roleNames = roles.map((role: any) => role.name).join(', ');
+        // Available roles'dan rol isimlerini bul
+        const availableRoles = this.common.roles();
+        const roleNames = userOperationClaims
+          .map((uoc: any) => {
+            const role = availableRoles.find(
+              (r: any) => r.id === uoc.operationClaimId
+            );
+            return role?.name || 'Bilinmeyen Rol';
+          })
+          .join(', ');
+
         return `<span style="color: #2196f3; cursor: pointer;" onclick="window.showRoleDetails('${params.data.id}')">${roleNames}</span>`;
       },
     },
@@ -178,9 +184,24 @@ export default class Users {
     const user = this.users().find((u) => u.id === userId);
     if (!user) return;
 
+    // UserOperationClaims'i OperationClaims formatına çevir (backward compatibility için)
+    const availableRoles = this.common.roles();
+    const operationClaims = (user.userOperationClaims || []).map((uoc) => {
+      const role = availableRoles.find((r) => r.id === uoc.operationClaimId);
+      return {
+        id: uoc.operationClaimId,
+        name: role?.name || 'Bilinmeyen Rol',
+      };
+    });
+
     const dialogRef = this.dialog.open(RoleDetailsDialog, {
       width: '600px',
-      data: { user },
+      data: {
+        user: {
+          ...user,
+          operationClaims,
+        },
+      },
     });
 
     dialogRef.afterClosed().subscribe((result) => {
@@ -200,7 +221,7 @@ export default class Users {
       maxWidth: '1400px',
       maxHeight: '90vh',
       disableClose: true,
-      data: { user },
+      data: { user: user }, // ✅ user objesi data içinde gönder
     });
 
     dialogRef.afterClosed().subscribe((result) => {
@@ -226,19 +247,16 @@ export default class Users {
         );
       }
 
-      // Remove roles
+      // Remove roles - UserOperationClaim ID'sini kullan
       for (const roleId of data.rolesToRemove) {
-        // Need userOperationClaim ID for deletion - get from userOperationClaims/getAll
-        const userClaims = await lastValueFrom(
-          this.http.get<any[]>('api/userOperationClaims/getAll')
-        );
-        const userClaim = userClaims.find(
-          (uc) => uc.userId === data.userId && uc.operationClaimId === roleId
+        const user = this.users().find((u) => u.id === data.userId);
+        const userOperationClaim = (user?.userOperationClaims || []).find(
+          (uoc) => uoc.operationClaimId === roleId
         );
 
-        if (userClaim) {
+        if (userOperationClaim) {
           await lastValueFrom(
-            this.http.delete(`api/userOperationClaims/${userClaim.id}`)
+            this.http.delete(`api/userOperationClaims/${userOperationClaim.id}`)
           );
         }
       }
@@ -256,6 +274,5 @@ export default class Users {
 
   refresh() {
     this.userStore.usersResource.reload();
-    this.userStore.rolesResource.reload();
   }
 }

@@ -4,8 +4,8 @@ import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { UserModel } from '@shared/models/user.model';
-import { OperationClaimsModel } from '@shared/models/operation-claims.model';
-import { Common } from './common';
+import { OperationClaimStore } from '@shared/stores/operation-claim.store';
+import { UserOperationClaimModel } from '@shared/models/user-operation-claim.model';
 
 interface LoginRequest {
   email: string;
@@ -21,21 +21,21 @@ interface LoginResponse {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
-  private common = inject(Common);
+  private operationClaimStore = inject(OperationClaimStore);
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>('api/auth/login', credentials).pipe(
-      tap(response => {
+      tap((response) => {
         this.setToken(response.accessToken.token);
-        
+
         const userInfo = this.parseUserFromToken(response.accessToken.token);
         if (userInfo) {
-          this.common.setUser(userInfo);
+          this.operationClaimStore.setUser(userInfo);
         }
       })
     );
@@ -43,7 +43,7 @@ export class AuthService {
 
   logout(): void {
     this.clearToken();
-    this.common.clearUser();
+    this.operationClaimStore.clearUser();
     this.router.navigateByUrl('/login');
   }
 
@@ -63,7 +63,7 @@ export class AuthService {
   isAuthenticated(): boolean {
     const token = this.getToken();
     if (!token) return false;
-    
+
     try {
       const decoded = this.decodeJWT(token);
       const now = Math.floor(Date.now() / 1000);
@@ -80,7 +80,7 @@ export class AuthService {
       const jsonPayload = decodeURIComponent(
         atob(base64)
           .split('')
-          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
           .join('')
       );
       return JSON.parse(jsonPayload);
@@ -93,35 +93,64 @@ export class AuthService {
   parseUserFromToken(token?: string): UserModel | undefined {
     const tokenToUse = token || this.getToken();
     if (!tokenToUse) return undefined;
-    
+
     const decoded = this.decodeJWT(tokenToUse);
     if (!decoded) return undefined;
 
-    const operationClaims: OperationClaimsModel[] = [];
-    const roles = decoded.role || decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || [];
-    
+    const userOperationClaims: UserOperationClaimModel[] = [];
+
+    const roles =
+      decoded.role ||
+      decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ||
+      [];
+
     if (Array.isArray(roles)) {
-      roles.forEach((roleName: string, index: number) => {
-        operationClaims.push({
-          id: index + 1,
-          name: roleName
+      roles.forEach((roleName: string) => {
+        userOperationClaims.push({
+          id: '', // backend id'si bilinmediği için boş
+          userId:
+            decoded.id ||
+            decoded[
+              'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'
+            ] ||
+            '',
+          operationClaimId: 0, // gerçek ID bilinmiyorsa sabit bırak
         });
       });
     } else if (typeof roles === 'string') {
-      operationClaims.push({
-        id: 1,
-        name: roles
+      userOperationClaims.push({
+        id: '',
+        userId:
+          decoded.id ||
+          decoded[
+            'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'
+          ] ||
+          '',
+        operationClaimId: 0,
       });
     }
 
     const user: UserModel = {
-      id: decoded.id || decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] || '',
-      name: decoded.name || decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] || '',
+      id:
+        decoded.id ||
+        decoded[
+          'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'
+        ] ||
+        '',
+      name:
+        decoded.name ||
+        decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] ||
+        '',
       firstName: decoded.firstName || decoded.given_name || '',
       lastName: decoded.lastName || decoded.family_name || '',
-      email: decoded.email || decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'] || '',
-      operationClaims: operationClaims,
-      status: 'active'
+      email:
+        decoded.email ||
+        decoded[
+          'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'
+        ] ||
+        '',
+      userOperationClaims: userOperationClaims,
+      status: 'active',
     };
 
     return user;
@@ -131,7 +160,7 @@ export class AuthService {
     if (this.isAuthenticated()) {
       const userInfo = this.parseUserFromToken();
       if (userInfo) {
-        this.common.setUser(userInfo);
+        this.operationClaimStore.setUser(userInfo);
       } else {
         this.logout();
       }

@@ -13,6 +13,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef, GridReadyEvent, GridApi } from 'ag-grid-community';
 import { UserStore } from '../../stores/user.store';
+import { Common } from '../../services/common';
 
 interface OperationClaim {
   id: number;
@@ -35,9 +36,10 @@ interface OperationClaim {
 })
 export default class Roles {
   private userStore = inject(UserStore);
+  private common = inject(Common);
 
-  readonly roles = computed(() => this.userStore.rolesResource.value() || []);
-  readonly loading = computed(() => this.userStore.rolesResource.isLoading());
+  readonly roles = computed(() => this.common.rolesResource.value() || []);
+  readonly loading = computed(() => this.common.rolesResource.isLoading());
 
   columnDefs: ColDef[] = [
     {
@@ -81,6 +83,6 @@ export default class Roles {
   }
 
   refresh() {
-    this.userStore.rolesResource.reload();
+    this.userStore.usersResource.reload();
   }
 }

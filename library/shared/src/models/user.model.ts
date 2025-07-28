@@ -1,4 +1,4 @@
-import { OperationClaimsModel } from './operation-claims.model';
+import { UserOperationClaimModel } from './user-operation-claim.model';
 
 export interface UserModel {
   id: string;
@@ -6,6 +6,6 @@ export interface UserModel {
   firstName: string;
   lastName: string;
   email: string;
-  operationClaims: OperationClaimsModel[];
+  userOperationClaims: UserOperationClaimModel[];
   status: string;
 }

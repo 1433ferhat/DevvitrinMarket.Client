@@ -42,9 +42,9 @@ export default class Layout {
 
   sidebarOpen = signal(true);
   
-  currentUser = computed(() => this.common.getCurrentUser());
-  currentUserName = computed(() => this.common.getFullName() || 'Admin');
-  currentUserInitials = computed(() => this.common.getUserInitials());
+  readonly currentUser = computed(() => this.common.user());
+  readonly currentUserName = computed(() => this.common.getFullName() || 'Admin');
+  readonly currentUserInitials = computed(() => this.common.getUserInitials());
 
   menuItems = [
     {
@@ -74,6 +74,6 @@ export default class Layout {
   }
 
   hasPermission(permission: string): boolean {
-    return this.common.hasRole('Admin') || this.common.hasRole(permission);
+    return this.common.hasRole(1) || this.common.hasRoleWithName(permission);
   }
 }
