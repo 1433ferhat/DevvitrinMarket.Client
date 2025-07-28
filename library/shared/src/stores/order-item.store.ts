@@ -6,11 +6,11 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { OrderItemModel } from '@shared/models/order-item.model';
-import { ProductModel } from '@shared/models/product.model';
+import { OrderItemModel } from '../models/order-item.model';
+import { ProductModel } from '../models/product.model';
 import { CustomerStore } from './customer.store';
 import { ProductStore } from './product.store';
-import { PriceType } from '@shared/enums/price-type.enum';
+import { PriceType } from '../enums/price-type.enum';
 @Injectable({
   providedIn: 'root',
 })
@@ -31,7 +31,7 @@ export class OrderItemStore {
       if (!items.length) return;
       const updatedItems = items.map((item) => {
         const price =
-          item?.product?.prices?.find((p) => p.priceType == type)?.price ?? 0;
+          item?.product?.prices?.find((p) => p.type == type)?.price ?? 0;
         item.unitPrice = price;
         item.totalPrice = price * item.quantity;
         return { ...item };
@@ -64,7 +64,7 @@ export class OrderItemStore {
     const customerType = this.customerType();
     const product = existingItem?.product;
     const price =
-      product?.prices?.find((p) => p.priceType == customerType)?.price ?? 0;
+      product?.prices?.find((p) => p.type == customerType)?.price ?? 0;
     const updatedItems = this.items().map((item) => {
       newQuantity = newQuantity === 0 ? item.quantity : newQuantity;
       if (item.id === itemId) {
@@ -92,7 +92,7 @@ export class OrderItemStore {
     const type = untracked(() => this.customerType());
     return this.items().reduce((total, item) => {
       const price =
-        item.product?.prices?.find((p) => p.priceType == type)?.price ?? 0;
+        item.product?.prices?.find((p) => p.type == type)?.price ?? 0;
       return total + price * item.quantity;
     }, 0);
   });

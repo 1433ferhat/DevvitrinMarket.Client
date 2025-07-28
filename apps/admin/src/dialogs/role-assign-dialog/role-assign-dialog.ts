@@ -23,6 +23,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { UserStore } from '../../stores/user.store';
 import { UserModel } from '@shared/models/user.model';
 import { Common } from '../../services/common';
+import { OperationClaimStore } from '@shared/stores/operation-claim.store';
 
 interface DialogData {
   user: UserModel;
@@ -49,16 +50,16 @@ interface DialogData {
 export default class RoleAssignDialog {
   private dialogRef = inject(MatDialogRef<RoleAssignDialog>);
   private userStore = inject(UserStore);
-  private common = inject(Common);
+  private operationClaimStore = inject(OperationClaimStore);
 
   readonly selectedRoles = signal<Set<number>>(new Set());
   readonly selectedCategory = signal<string>('all');
   readonly selectedPermission = signal<string>('all');
 
   readonly availableRoles = computed(
-    () => this.common.rolesResource.value() || []
+    () => this.operationClaimStore.rolesResource.value() || []
   );
-  readonly loading = computed(() => this.common.rolesResource.isLoading());
+  readonly loading = computed(() => this.operationClaimStore.rolesResource.isLoading());
 
   // Role kategorilerini ayır
   readonly roleCategories = computed(() => {

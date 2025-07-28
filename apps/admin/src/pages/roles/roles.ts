@@ -14,6 +14,7 @@ import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef, GridReadyEvent, GridApi } from 'ag-grid-community';
 import { UserStore } from '../../stores/user.store';
 import { Common } from '../../services/common';
+import { OperationClaimStore } from '@shared/stores/operation-claim.store';
 
 interface OperationClaim {
   id: number;
@@ -36,10 +37,10 @@ interface OperationClaim {
 })
 export default class Roles {
   private userStore = inject(UserStore);
-  private common = inject(Common);
+  private operationClaimStore = inject(OperationClaimStore);
 
-  readonly roles = computed(() => this.common.rolesResource.value() || []);
-  readonly loading = computed(() => this.common.rolesResource.isLoading());
+  readonly roles = computed(() => this.operationClaimStore.rolesResource.value() || []);
+  readonly loading = computed(() => this.operationClaimStore.rolesResource.isLoading());
 
   columnDefs: ColDef[] = [
     {

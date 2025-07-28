@@ -20,11 +20,7 @@ export class CustomerCreateForm {
     ] as const;
 
     for (const key of keys) {
-      if (key === 'isCorporate') {
-        group[key] = new FormControl(data[key] ?? false, Validators.required);
-      } else {
         group[key] = new FormControl(data[key] ?? null);
-      }
     }
 
     // Zorunlu alanlar için validator'ları ekle
@@ -41,39 +37,21 @@ export class CustomerCreateForm {
   isFormValidCustom(data: CustomerModel): boolean {
     if (!data) return false;
 
-    // Temel alanların kontrolü
-    if (
-      !data.firstName ||
-      !data.lastName ||
-      !data.phone ||
-      !data.email ||
-      data.type === null ||
-      data.type === undefined
-    ) {
-      return false;
-    }
-
     // Eğer kurumsal müşteri ise
     if (data.isCorporate) {
       if (!data.companyName) return false;
 
       if (data.isEInvoice) {
-        // E-Fatura mükellefi ise vergi numarası zorunlu
         if (!data.taxNumber || data.taxNumber.toString().length !== 10) {
           return false;
         }
-      } else {
-        // E-Fatura değilse TC kimlik numarası zorunlu
-        if (!data.tcNo || data.tcNo.toString().length !== 11) {
-          return false;
-        }
       }
-    } else {
-      // Bireysel müşteri ise TC kimlik numarası zorunlu
+    }
+    
+    if (!data.isCorporate || (data.isCorporate && !data.isEInvoice))
       if (!data.tcNo || data.tcNo.toString().length !== 11) {
         return false;
       }
-    }
 
     return true;
   }

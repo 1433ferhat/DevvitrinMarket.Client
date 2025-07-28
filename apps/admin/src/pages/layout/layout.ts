@@ -17,6 +17,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
 import { AuthService } from '../../services/auth.service';
 import { Common } from '../../services/common';
+import { OperationClaimStore } from '@shared/stores/operation-claim.store';
 
 @Component({
   selector: 'app-layout',
@@ -38,13 +39,13 @@ import { Common } from '../../services/common';
 })
 export default class Layout {
   private authService = inject(AuthService);
-  private common = inject(Common);
+  private operationClaimStore = inject(OperationClaimStore);
 
   sidebarOpen = signal(true);
   
-  readonly currentUser = computed(() => this.common.user());
-  readonly currentUserName = computed(() => this.common.getFullName() || 'Admin');
-  readonly currentUserInitials = computed(() => this.common.getUserInitials());
+  readonly currentUser = computed(() => this.operationClaimStore.user());
+  readonly currentUserName = computed(() => this.operationClaimStore.getFullName() || 'Admin');
+  readonly currentUserInitials = computed(() => this.operationClaimStore.getUserInitials());
 
   menuItems = [
     {
@@ -74,6 +75,6 @@ export default class Layout {
   }
 
   hasPermission(permission: string): boolean {
-    return this.common.hasRole(1) || this.common.hasRoleWithName(permission);
+    return this.operationClaimStore.hasRole(1) || this.operationClaimStore.hasRoleWithName(permission);
   }
 }

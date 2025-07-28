@@ -21,6 +21,7 @@ import RoleAssignDialog from '../../dialogs/role-assign-dialog/role-assign-dialo
 import { UserStore } from '../../stores/user.store';
 import { UserModel } from '@shared/models/user.model';
 import { Common } from '../../services/common';
+import { OperationClaimStore } from '@shared/stores/operation-claim.store';
 
 @Component({
   selector: 'app-users',
@@ -43,7 +44,7 @@ export default class Users {
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
   private userStore = inject(UserStore);
-  private common = inject(Common);
+  private operationClaimStore = inject(OperationClaimStore);
 
   private gridApi!: GridApi;
 
@@ -77,7 +78,7 @@ export default class Users {
           return '<span style="color: #999;">Rol yok</span>';
 
         // Available roles'dan rol isimlerini bul
-        const availableRoles = this.common.roles();
+        const availableRoles = this.operationClaimStore.roles();
         const roleNames = userOperationClaims
           .map((uoc: any) => {
             const role = availableRoles.find(
@@ -185,7 +186,7 @@ export default class Users {
     if (!user) return;
 
     // UserOperationClaims'i OperationClaims formatına çevir (backward compatibility için)
-    const availableRoles = this.common.roles();
+    const availableRoles = this.operationClaimStore.roles();
     const operationClaims = (user.userOperationClaims || []).map((uoc) => {
       const role = availableRoles.find((r) => r.id === uoc.operationClaimId);
       return {

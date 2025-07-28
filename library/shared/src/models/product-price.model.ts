@@ -4,7 +4,7 @@ import { ProductModel } from './product.model';
 export interface ProductPriceModel {
   id: string;
   price: number;
-  priceType: PriceType;
+  type: PriceType;
   productId: string;
   product?: ProductModel;
 }
@@ -12,6 +12,6 @@ export interface ProductPriceModel {
 export const initialProductPrice: ProductPriceModel = {
   id: '',
   price: 0,
-  priceType: PriceType.Undefined,
+  type: PriceType.Undefined,
   productId: ''
 };

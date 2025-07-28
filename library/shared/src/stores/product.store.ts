@@ -74,7 +74,7 @@ export class ProductStore {
     product: ProductModel,
     priceType: PriceType = PriceType.ECZ
   ): number {
-    const price = product.prices?.find((p) => p.priceType === priceType);
+    const price = product.prices?.find((p) => p.type === priceType);
     return price?.price || product.prices?.[0]?.price || 0;
   }
 

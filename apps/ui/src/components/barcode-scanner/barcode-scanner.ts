@@ -1,8 +1,6 @@
 // src/app/components/barcode-scanner/barcode-scanner.ts
 import {
   Component,
-  Output,
-  EventEmitter,
   ViewChild,
   ElementRef,
   ChangeDetectionStrategy,

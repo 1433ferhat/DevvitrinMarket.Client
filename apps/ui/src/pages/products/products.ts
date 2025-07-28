@@ -12,6 +12,7 @@ import { ProductStore } from '@shared/stores/product.store';
 import { FlexiGridModule } from 'flexi-grid';
 import { ColDef, GridApi, GridReadyEvent } from 'ag-grid-community';
 import { AgGridAngular } from 'ag-grid-angular';
+import { ProductBarcodeModel } from '@shared/models/product-barcode.model';
 
 @Component({
   selector: 'app-products',
@@ -41,8 +42,7 @@ export default class products {
     this.updateRowCount();
   }
 
-  updateRowCount() {
-  }
+  updateRowCount() {}
   localeText = {
     totalRows: 'Satır: {rowCount}',
   };
@@ -64,6 +64,16 @@ export default class products {
       headerName: 'Kategori',
       filter: 'agTextColumnFilter',
       floatingFilter: true,
+    },
+     {
+      field: 'barcodes',
+      headerName: 'Barkod',
+      filter: 'agTextColumnFilter',
+      floatingFilter: true,
+      valueGetter: (params) => {
+        const barcodes: ProductBarcodeModel[] = params.data.barcodes;
+        return barcodes?.map((b) => b.value).join(', ') || '';
+      },
     },
   ];
 

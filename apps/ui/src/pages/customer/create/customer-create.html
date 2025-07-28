@@ -45,7 +45,7 @@
 
                 <!-- Müşteri Tipi -->
                 <div class="customer-type-section">
-                    <label>Müşteri Tipi *</label>
+                    <label for>Müşteri Tipi *</label>
                     <mat-radio-group formControlName="isCorporate" (change)="onTypeChange($event.value)">
                         <mat-radio-button [value]="false">Bireysel</mat-radio-button>
                         <mat-radio-button [value]="true">Kurumsal</mat-radio-button>

@@ -1,11 +1,12 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { Common } from '../services/common';
+
+import { OperationClaimStore } from '@shared/stores/operation-claim.store';
 
 export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
-  const common = inject(Common);
+  const operationClaimStore = inject(OperationClaimStore);
   const router = inject(Router);
 
   // Token ve authentication kontrolü
@@ -15,10 +16,10 @@ export const authGuard: CanActivateFn = (route, state) => {
   }
 
   // User bilgisi signal'da yoksa token'dan yükle
-  if (!common.user()) {
+  if (!operationClaimStore.user()) {
     const userInfo = authService.parseUserFromToken();
     if (userInfo) {
-      common.setUser(userInfo);
+      operationClaimStore.setUser(userInfo);
     } else {
       // Token var ama geçersiz, logout yap
       authService.logout();
@@ -30,7 +31,7 @@ export const authGuard: CanActivateFn = (route, state) => {
 
 // Admin sayfaları için özel guard
 export const adminGuard: CanActivateFn = (route, state) => {
-  const common = inject(Common);
+  const operationClaimStore = inject(OperationClaimStore);
   const router = inject(Router);
 
   // Önce authentication kontrolü
@@ -38,7 +39,7 @@ export const adminGuard: CanActivateFn = (route, state) => {
   if (!authResult) return false;
 
   // Admin kontrolü
-  if (!common.isAdmin()) {
+  if (!operationClaimStore.isAdmin()) {
     router.navigateByUrl('/dashboard');
     return false;
   }
